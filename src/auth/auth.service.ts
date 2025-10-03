@@ -54,13 +54,6 @@ export class AuthService {
   }
 
   async signUp(dto: RegisterDto) {
-    const verified = await this.verificationService.verifyCode(
-      dto.phone || dto.email,
-      dto.code,
-    );
-
-    if (!verified) throw new UnauthorizedException('Verification failed');
-
     const hash = await bcrypt.hash(dto.password, 10);
 
     const newUser = await this.userService.create({
