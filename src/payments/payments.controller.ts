@@ -1,34 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  private readonly logger = new Logger(PaymentsController.name);
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.create(createPaymentDto);
+  constructor(private paymentsService: PaymentsService) {}
+
+  @Post('create')
+  @UseGuards(JwtAuthGuard)
+  async createPayment(@Req() req, @Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentsService.createPayment(
+      req.user.id,
+      req.user.email,
+      createPaymentDto,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.paymentsService.findAll();
+  @Get(':paymentId/status')
+  @UseGuards(JwtAuthGuard)
+  async checkStatus(@Param('paymentId') paymentId: string, @Req() req) {
+    return this.paymentsService.checkPaymentStatus(paymentId, req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(+id);
+  @Post('webhook/yookassa')
+  @HttpCode(HttpStatus.OK)
+  async handleWebhook(@Body() webhookData: any) {
+    this.logger.log('📩 Webhook received from YooKassa');
+    return this.paymentsService.handleWebhook(webhookData);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentsService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentsService.remove(+id);
+  @Get('my-payments')
+  @UseGuards(JwtAuthGuard)
+  async getMyPayments(@Req() req) {
+    return this.paymentsService.getUserPayments(req.user.id);
   }
 }

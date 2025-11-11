@@ -4,34 +4,49 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
+  JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-
-export enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  FAILED = 'failed',
-}
-
+import { User } from 'src/users/entities/user.entity';
+import { Subscription } from 'src/subscriptions/entities/subscription.entity';
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @ManyToOne(() => User, (user) => user.payments)
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column()
-  provider: string;
+  userId: string;
+
+  @ManyToOne(() => Subscription, { nullable: true })
+  @JoinColumn({ name: 'subscriptionId' })
+  subscription: Subscription;
 
   @Column({ nullable: true })
-  providerPaymentId: string;
+  subscriptionId: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column()
+  yookassaPaymentId: string;
+
+  @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-  status: PaymentStatus;
+  @Column({ default: 'RUB' })
+  currency: string;
+
+  @Column()
+  status: string; // pending, succeeded, canceled
+
+  @Column('text')
+  description: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: any;
+
+  @Column({ type: 'text', nullable: true })
+  confirmationUrl: string;
 
   @CreateDateColumn()
   createdAt: Date;

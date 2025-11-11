@@ -4,21 +4,30 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  OneToMany,
+  UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
+import { SubscriptionPlan } from './subscription-plan.entity';
 import { User } from 'src/users/entities/user.entity';
-import { CheckUsage } from 'src/qr/entities/check-usage.entity';
 
-@Entity()
+@Entity('subscriptions')
 export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (user) => user.subscriptions, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.subscriptions)
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column()
-  type: string; // e.g. "basic", "premium"
+  userId: string;
+
+  @ManyToOne(() => SubscriptionPlan)
+  @JoinColumn({ name: 'planId' })
+  plan: SubscriptionPlan;
+
+  @Column()
+  planId: string;
 
   @Column({ type: 'timestamp' })
   startDate: Date;
@@ -26,12 +35,21 @@ export class Subscription {
   @Column({ type: 'timestamp' })
   endDate: Date;
 
-  @Column({ default: true })
+  @Column({ default: false })
   isActive: boolean;
+
+  @Column({ default: false })
+  autoRenew: boolean;
+
+  @Column({ default: 'pending' })
+  status: string; // pending, active, expired, canceled
+
+  @Column({ nullable: true })
+  paymentId: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => CheckUsage, (usage) => usage.subscription)
-  usages: CheckUsage[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

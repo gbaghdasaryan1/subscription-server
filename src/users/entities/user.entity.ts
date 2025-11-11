@@ -9,6 +9,7 @@ import {
 import { Subscription } from '../../subscriptions/entities/subscription.entity';
 import { Gender } from './gender.enum';
 import { CheckUsage } from '../../qr/entities/check-usage.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Entity('users')
 export class User {
@@ -41,6 +42,9 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   resetTokenExpires?: Date | null;
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
   @OneToMany(() => Subscription, (s) => s.user)
   subscriptions: Subscription[];

@@ -12,6 +12,12 @@ export class AuthController {
     return this.authService.signUp(dto);
   }
 
+  @Post('login')
+  async login(@Body() dto: LoginDto) {
+    const res = await this.authService.login(dto);
+    return res;
+  }
+
   @Post('verification-otp')
   sendVerificationCode(
     @Body() body: { emailOrPhone: string; method: 'sms' | 'mail' },
@@ -27,10 +33,5 @@ export class AuthController {
   @Post('verify-otp')
   async verifyOtp(@Body() dto: { target: string; otp: string }) {
     return this.authService.verifyRegistrationOtp(dto.target, dto.otp);
-  }
-
-  @Post('login')
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
   }
 }

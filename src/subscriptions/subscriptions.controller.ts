@@ -1,41 +1,39 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Param,
-  Body,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
-import { UsersService } from 'src/users/users.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
-  constructor(
-    private subscriptionsService: SubscriptionsService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private subscriptionsService: SubscriptionsService) {}
 
-  // POST /subscriptions/:userId
-  @Post(':userId')
-  async create(
-    @Param('userId') userId: string,
-    @Body() body: { type: string; durationDays: number },
-  ) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found'); // Simplified error handling for brevity
-    }
-    return await this.subscriptionsService.create(
-      user,
-      body.type,
-      body.durationDays,
+  @Post('create')
+  @UseGuards(JwtAuthGuard)
+  async createSubscription(@Req() req, @Body() body: { planId: string }) {
+    return this.subscriptionsService.createSubscription(
+      req.user.id,
+      body.planId,
     );
   }
 
-  // GET /subscriptions/:userId
-  @Get(':userId')
-  async getUserSubscriptions(@Param('userId') userId: string) {
-    return this.subscriptionsService.getUserSubscriptions(userId);
+  @Get('my-subscriptions')
+  @UseGuards(JwtAuthGuard)
+  async getMySubscriptions(@Req() req) {
+    return this.subscriptionsService.getUserSubscriptions(req.user.id);
+  }
+
+  @Get('current')
+  @UseGuards(JwtAuthGuard)
+  async getCurrentSubscription(@Req() req) {
+    return this.subscriptionsService.getCurrentSubscription(req.user.id);
+  }
+
+  @Get('plans')
+  async getAllPlans() {
+    return this.subscriptionsService.getAllPlans();
+  }
+
+  @Post('seed-plans')
+  async seedPlans() {
+    return this.subscriptionsService.seedPlans();
   }
 }

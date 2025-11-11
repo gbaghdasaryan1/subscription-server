@@ -34,7 +34,8 @@ export class AuthService {
     const user = await this.validateUser(dto.emailOrPhone, dto.password);
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const payload = { sub: user.id, phone: user.phone };
-    return { access_token: this.jwt.sign(payload) };
+    const token = this.jwt.sign(payload);
+    return { access_token: token, user };
   }
 
   async sendVerificationCode(target: string, method: 'sms' | 'mail') {
