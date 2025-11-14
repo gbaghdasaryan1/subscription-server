@@ -33,7 +33,7 @@ export class PaymentsService {
     });
 
     if (!plan) {
-      throw new NotFoundException('Plan not found');
+      throw new NotFoundException('План не найден');
     }
 
     // Создаем платеж в ЮKassa
@@ -74,7 +74,7 @@ export class PaymentsService {
     });
 
     if (!payment) {
-      throw new NotFoundException('Payment not found');
+      throw new NotFoundException('Платеж не найден');
     }
 
     // Получаем актуальный статус из ЮKassa
@@ -123,7 +123,7 @@ export class PaymentsService {
     });
 
     if (!dbPayment) {
-      throw new NotFoundException('Payment not found in database');
+      throw new NotFoundException('Платеж не найден в базе данных');
     }
 
     // Обновляем статус

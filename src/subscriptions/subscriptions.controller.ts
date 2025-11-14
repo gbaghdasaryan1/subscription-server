@@ -8,9 +8,9 @@ export class SubscriptionsController {
 
   @Post('create')
   @UseGuards(JwtAuthGuard)
-  async createSubscription(@Req() req, @Body() body: { planId: string }) {
+  async createSubscription(@Body() body: { planId: string; userId: string }) {
     return this.subscriptionsService.createSubscription(
-      req.user.id,
+      body.userId,
       body.planId,
     );
   }
@@ -30,6 +30,11 @@ export class SubscriptionsController {
   @Get('plans')
   async getAllPlans() {
     return this.subscriptionsService.getAllPlans();
+  }
+
+  @Get('plan')
+  async getMonthlyPlan() {
+    return this.subscriptionsService.getMonthlyPlan();
   }
 
   @Post('seed-plans')

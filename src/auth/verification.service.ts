@@ -29,7 +29,7 @@ export class VerificationService {
     // void this.mailService.sendVerificationCode(target, code);
     // TODO: отправить код через SMS или Email
 
-    return { message: 'Verification code sent', code }; // ⚠️ В проде code не возвращаем!
+    return { message: 'Код подтверждения отправлен', code }; // ⚠️ В проде code не возвращаем!
   }
 
   async verifyCode(target: string, code: string): Promise<boolean> {
@@ -39,11 +39,11 @@ export class VerificationService {
     });
 
     if (!record) {
-      throw new NotFoundException('Invalid or already used code');
+      throw new NotFoundException('Неверный код или код уже использован');
     }
 
     if (record.expiresAt < new Date()) {
-      throw new GoneException('Code expired');
+      throw new GoneException('Код истек');
     }
 
     // Mark code as used in one safe update
@@ -53,7 +53,7 @@ export class VerificationService {
     );
 
     if (result.affected === 0) {
-      throw new BadRequestException('Code already used or invalid');
+      throw new BadRequestException('Код уже использован или недействителен');
     }
 
     return true;

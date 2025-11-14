@@ -3,12 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
 import { SubscriptionPlan } from './subscription-plan.entity';
 import { User } from 'src/users/entities/user.entity';
+import { CheckUsage } from 'src/qr/entities/check-usage.entity';
 
 @Entity('subscriptions')
 export class Subscription {
@@ -46,6 +48,9 @@ export class Subscription {
 
   @Column({ nullable: true })
   paymentId: string;
+
+  @OneToMany(() => CheckUsage, (usage) => usage.subscription)
+  usages: CheckUsage[];
 
   @CreateDateColumn()
   createdAt: Date;

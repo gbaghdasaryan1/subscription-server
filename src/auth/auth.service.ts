@@ -32,7 +32,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.validateUser(dto.emailOrPhone, dto.password);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException('Неверные учетные данные');
     const payload = { sub: user.id, phone: user.phone };
     const token = this.jwt.sign(payload);
     return { access_token: token, user };
@@ -41,7 +41,9 @@ export class AuthService {
   async sendVerificationCode(target: string, method: 'sms' | 'mail') {
     const existing = await this.userService.findByPhoneOrEmail(target);
     if (existing) {
-      throw new ConflictException('User with this phone already exists');
+      throw new ConflictException(
+        'Пользователь с этим номером телефона уже существует',
+      );
     }
     const { code } = await this.verificationService.createVerification(target);
     if (method === 'mail') {

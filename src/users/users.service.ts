@@ -23,11 +23,12 @@ export class UsersService {
   ) {}
 
   async create(dto: CreateUserDto) {
-    const found = await this.userRepo.findOne({
-      where: [{ phone: dto.phone }, { email: dto.email }],
-    });
-    if (found)
-      throw new BadRequestException('User with this phone already exists');
+    const existing = await this.findByPhoneOrEmail(dto.phone);
+    if (existing) {
+      throw new BadRequestException(
+        'Пользователь с этим номером телефона уже существует',
+      );
+    }
     const user = this.userRepo.create({
       ...dto,
       passwordHash: dto.password,
@@ -73,7 +74,7 @@ export class UsersService {
     const user = await this.userRepo.findOne({
       where: [{ phone: emailOrPhone }, { email: emailOrPhone }],
     });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Пользователь не найден');
 
     const otp = randomInt(100000, 999999).toString(); // 6-digit code
     const expires = new Date(Date.now() + 1000 * 60 * 5); // 5 minutes
@@ -90,7 +91,7 @@ export class UsersService {
       await this.mailService.sendPasswordReset(user.email, otp);
     }
 
-    return { message: 'Reset instructions sent' };
+    return { message: 'Инструкции для сброса пароля отправлены' };
   }
 
   async resetPassword(emailOrPhone: string, otp: string, newPassword: string) {
@@ -103,7 +104,7 @@ export class UsersService {
     });
 
     if (!user || !user.resetOtpExpires || user.resetOtpExpires < new Date()) {
-      throw new BadRequestException('Invalid or expired OTP');
+      throw new BadRequestException('Неверный или истекший код');
     }
 
     user.passwordHash = await hash(newPassword, 10);
@@ -111,6 +112,6 @@ export class UsersService {
     user.resetOtpExpires = null;
 
     await this.userRepo.save(user);
-    return { message: 'Password successfully reset' };
+    return { message: 'Пароль успешно сброшен' };
   }
 }

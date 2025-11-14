@@ -17,7 +17,7 @@ export class SubscriptionsService {
     const plan = await this.plansRepository.findOne({ where: { id: planId } });
 
     if (!plan) {
-      throw new NotFoundException('Plan not found');
+      throw new NotFoundException('План не найден');
     }
 
     // Рассчитываем даты
@@ -59,58 +59,33 @@ export class SubscriptionsService {
     return this.plansRepository.find({ where: { isActive: true } });
   }
 
+  async getMonthlyPlan() {
+    return this.plansRepository.findOne({ where: { isActive: true } });
+  }
+
   async seedPlans() {
     const existingPlans = await this.plansRepository.count();
 
     if (existingPlans > 0) {
-      return { message: 'Plans already exist' };
+      return { message: 'Планы уже существуют' };
     }
 
-    const plans = [
-      {
-        name: 'Недельная',
-        price: 299,
-        durationDays: 7,
-        description: 'Идеально для пробы',
-        features: [
-          '5 использований в день',
-          'Доступ ко всем магазинам',
-          'Поддержка 24/7',
-        ],
-        maxUsagesPerDay: 5,
-      },
-      {
-        name: 'Месячная',
-        price: 999,
-        durationDays: 30,
-        description: 'Самый популярный',
-        features: [
-          '10 использований в день',
-          'Доступ ко всем магазинам',
-          'Поддержка 24/7',
-          'Специальные предложения',
-        ],
-        maxUsagesPerDay: 10,
-        discount: 25,
-      },
-      {
-        name: 'Квартальная',
-        price: 2499,
-        durationDays: 90,
-        description: 'Максимальная выгода',
-        features: [
-          'Неограниченное использование',
-          'Доступ ко всем магазинам',
-          'Приоритетная поддержка',
-          'Эксклюзивные предложения',
-          'Бонусы и скидки',
-        ],
-        maxUsagesPerDay: 999,
-        discount: 32,
-      },
-    ];
+    const plan = {
+      name: 'Месячная подписка',
+      price: 999,
+      durationDays: 30,
+      description: 'Доступ ко всем функциям на 30 дней',
+      features: [
+        'Неограниченное использование',
+        'Доступ ко всем магазинам',
+        'Поддержка 24/7',
+        'Специальные предложения',
+      ],
+      maxUsagesPerDay: 999,
+      isActive: true,
+    };
 
-    await this.plansRepository.save(plans);
-    return { message: 'Plans seeded successfully', count: plans.length };
+    await this.plansRepository.save(plan);
+    return { message: 'План успешно создан', plan };
   }
 }
